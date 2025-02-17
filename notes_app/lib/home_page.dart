@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'add_note_page.dart';
-import 'edit_note_page.dart';
-import 'database_helper.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -11,25 +9,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Map<String, dynamic>> notes = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _loadNotes();
-  }
-
-  Future<void> _loadNotes() async {
-    final data = await DatabaseHelper.instance.readAllNotes();
-    setState(() {
-      notes = data;
-    });
-  }
-
-  Future<void> _deleteNote(int id) async {
-    await DatabaseHelper.instance.deleteNote(id);
-    _loadNotes();
-  }
+  // Pour le moment, on stocke les notes dans une liste simple
+  List<String> notes = [];
 
   @override
   Widget build(BuildContext context) {
@@ -42,30 +23,19 @@ class _HomePageState extends State<HomePage> {
           : ListView.builder(
               itemCount: notes.length,
               itemBuilder: (context, index) {
-                final note = notes[index];
                 return ListTile(
-                  title: Text(note['content']),
+                  title: Text(notes[index]),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete),
-                    onPressed: () => _deleteNote(note['id']),
+                    onPressed: () {
+                      // Suppression d'une note
+                      setState(() {
+                        notes.removeAt(index);
+                      });
+                    },
                   ),
-                  onTap: () async {
-                    final updatedNote = await Navigator.push<String>(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => EditNotePage(
-                          initialContent: note['content'],
-                          noteId: note['id'],
-                        ),
-                      ),
-                    );
-                    if (updatedNote != null &&
-                        updatedNote.isNotEmpty &&
-                        updatedNote != note['content']) {
-                      await DatabaseHelper.instance.updateNote(
-                          note['id'], updatedNote);
-                      _loadNotes();
-                    }
+                  onTap: () {
+                    // Ici, on pourra ajouter la fonctionnalité d'édition
                   },
                 );
               },
@@ -73,16 +43,18 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () async {
+          // Navigation vers la page d'ajout de note
           final newNote = await Navigator.push<String>(
             context,
             MaterialPageRoute(builder: (context) => const AddNotePage()),
           );
           if (newNote != null && newNote.isNotEmpty) {
-            await DatabaseHelper.instance.createNote(newNote);
-            _loadNotes();
+            setState(() {
+              notes.add(newNote);
+            });
           }
         },
       ),
-    ); 
+    );
   }
 }

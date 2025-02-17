@@ -11,6 +11,12 @@ class _AddNotePageState extends State<AddNotePage> {
   final TextEditingController _controller = TextEditingController();
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+  
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -22,21 +28,20 @@ class _AddNotePageState extends State<AddNotePage> {
           children: [
             TextField(
               controller: _controller,
-              maxLines: 5,
               decoration: const InputDecoration(
-                hintText: 'Écrivez votre note ici...',
+                labelText: 'Contenu de la note',
                 border: OutlineInputBorder(),
               ),
+              maxLines: null,
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                if (_controller.text.isNotEmpty) {
-                  Navigator.pop(context, _controller.text);
-                }
+                // Retourner la note saisie à la page d'accueil
+                Navigator.pop(context, _controller.text);
               },
               child: const Text('Enregistrer'),
-            ),
+            )
           ],
         ),
       ),
