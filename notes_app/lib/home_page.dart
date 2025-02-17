@@ -12,6 +12,8 @@ class _HomePageState extends State<HomePage> {
   List<String> notes = [];
   List<String> filteredNotes = [];
   TextEditingController searchController = TextEditingController();
+  
+  get provider => null;
 
   @override
   void initState() {
@@ -67,7 +69,7 @@ class _HomePageState extends State<HomePage> {
                     },
                   ),
                   onTap: () {
-                    // Fonctionnalité d'édition à ajouter ici
+                     provider.startEditing(index);// Fonctionnalité d'édition à ajouter ici
                   },
                 );
               },
