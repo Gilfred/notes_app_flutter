@@ -24,28 +24,42 @@ class DatabaseHelper {
   Future _createDB(Database db, int version) async {
     const idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
     const textType = 'TEXT NOT NULL';
+    const dateType = 'TEXT NOT NULL'; 
 
     await db.execute('''
       CREATE TABLE notes (
         id $idType,
-        content $textType
+        content $textType,
+        createdAt $dateType
       )
     ''');
   }
 
+  // Ajout de la gestion de la date lors de la création d'une note
   Future<int> createNote(String content) async {
     final db = await instance.database;
-    return await db.insert('notes', {'content': content});
+    return await db.insert('notes', {
+      'content': content,
+      'createdAt': DateTime.now().toIso8601String() // Stocker la date actuelle
+    });
   }
 
   Future<List<Map<String, dynamic>>> readAllNotes() async {
     final db = await instance.database;
-    return await db.query('notes');
+    return await db.query('notes', orderBy: 'createdAt DESC'); // Trier par date
   }
 
   Future<int> updateNote(int id, String content) async {
     final db = await instance.database;
-    return await db.update('notes', {'content': content}, where: 'id = ?', whereArgs: [id]);
+    return await db.update(
+      'notes',
+      {
+        'content': content,
+        'createdAt': DateTime.now().toIso8601String() // Mise à jour de la date
+      },
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 
   Future<int> deleteNote(int id) async {

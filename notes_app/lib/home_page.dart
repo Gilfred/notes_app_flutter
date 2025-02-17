@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'database_helper.dart';
 import 'add_note_page.dart';
 import 'edit_note_page.dart';
+import 'database_helper.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -45,12 +45,9 @@ class _HomePageState extends State<HomePage> {
                 final note = notes[index];
                 return ListTile(
                   title: Text(note['content']),
-                  subtitle: Text("Créé le : ${note['createdAt']}"),
                   trailing: IconButton(
                     icon: const Icon(Icons.delete),
-                    onPressed: () {
-                      _deleteNote(note['id']);
-                    },
+                    onPressed: () => _deleteNote(note['id']),
                   ),
                   onTap: () async {
                     final updatedNote = await Navigator.push<String>(
@@ -62,7 +59,11 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                     );
-                    if (updatedNote != null) {
+                    if (updatedNote != null &&
+                        updatedNote.isNotEmpty &&
+                        updatedNote != note['content']) {
+                      await DatabaseHelper.instance.updateNote(
+                          note['id'], updatedNote);
                       _loadNotes();
                     }
                   },
@@ -76,12 +77,12 @@ class _HomePageState extends State<HomePage> {
             context,
             MaterialPageRoute(builder: (context) => const AddNotePage()),
           );
-          if (newNote != null) {
+          if (newNote != null && newNote.isNotEmpty) {
             await DatabaseHelper.instance.createNote(newNote);
             _loadNotes();
           }
         },
       ),
-    );
+    ); 
   }
 }
